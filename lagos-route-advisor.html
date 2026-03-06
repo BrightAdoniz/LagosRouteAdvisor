@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oya Move — Lagos Route Advisor</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00C853;
+    --green-dark: #009624;
+    --yellow: #FFD600;
+    --black: #0A0A0A;
+    --surface: #111111;
+    --surface2: #1A1A1A;
+    --surface3: #222222;
+    --border: #2A2A2A;
+    --text: #F0F0F0;
+    --muted: #777;
+    --white: #ffffff;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  header {
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+  }
+
+  .logo span { color: var(--green); }
+
+  .badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 5px 12px;
+    border-radius: 100px;
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+
+  /* HERO */
+  .hero {
+    padding: 48px 24px 32px;
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 6vw, 44px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 12px;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--green);
+  }
+
+  .hero p {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 420px;
+    margin: 0 auto;
+  }
+
+  /* MAIN CONTAINER */
+  .container {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    width: 100%;
+    flex: 1;
+  }
+
+  /* SEARCH FORM */
+  .search-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+
+  .input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .input-wrap {
+    position: relative;
+  }
+
+  .input-dot {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid var(--muted);
+  }
+
+  .input-dot.green { border-color: var(--green); background: var(--green); }
+  .input-dot.yellow { border-color: var(--yellow); background: var(--yellow); }
+
+  .input-line {
+    position: absolute;
+    left: 18px;
+    top: calc(50% + 8px);
+    width: 2px;
+    height: 18px;
+    background: var(--border);
+  }
+
+  input[type="text"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 14px 14px 36px;
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="text"]:focus { border-color: var(--green); }
+  input[type="text"]::placeholder { color: var(--muted); }
+
+  .prefs-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+
+  .pref-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-weight: 500;
+  }
+
+  .pref-btn.active {
+    background: rgba(0,200,83,0.12);
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .go-btn {
+    width: 100%;
+    background: var(--green);
+    color: var(--black);
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 15px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    letter-spacing: 0.3px;
+  }
+
+  .go-btn:hover { background: #00e65e; }
+  .go-btn:active { transform: scale(0.98); }
+  .go-btn:disabled { background: #1a3d26; color: #2a6640; cursor: not-allowed; }
+
+  /* QUICK ROUTES */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .quick-routes {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+  }
+
+  .quick-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .quick-chip:hover {
+    border-color: var(--green);
+    color: var(--green);
+    background: rgba(0,200,83,0.06);
+  }
+
+  /* RESULT */
+  .result-wrap {
+    animation: fadeUp 0.35s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    gap: 12px;
+  }
+
+  .result-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .result-title .from-to {
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .total-badge {
+    background: rgba(0,200,83,0.12);
+    border: 1px solid rgba(0,200,83,0.3);
+    border-radius: 8px;
+    padding: 8px 12px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .total-badge .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .total-badge .amount { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; color: var(--green); }
+
+  /* STEPS */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 20px;
+  }
+
+  .step {
+    display: flex;
+    gap: 12px;
+    position: relative;
+  }
+
+  .step-timeline {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 32px;
+  }
+
+  .step-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+    z-index: 1;
+    border: 2px solid var(--border);
+    background: var(--surface);
+  }
+
+  .step-connector {
+    width: 2px;
+    flex: 1;
+    min-height: 20px;
+    background: var(--border);
+    margin: 4px 0;
+  }
+
+  .step-body {
+    padding: 4px 0 20px;
+    flex: 1;
+  }
+
+  .step:last-child .step-body { padding-bottom: 8px; }
+
+  .step-location {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .step-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+
+  .step-transport {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .transport-tag {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+  }
+
+  .tag-danfo { background: rgba(255,214,0,0.15); color: var(--yellow); }
+  .tag-brt { background: rgba(0,200,83,0.15); color: var(--green); }
+  .tag-keke { background: rgba(255,100,50,0.15); color: #ff7043; }
+  .tag-okada { background: rgba(180,100,255,0.15); color: #ce93d8; }
+  .tag-ferry { background: rgba(100,180,255,0.15); color: #64b5f6; }
+
+  .step-fare {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--green);
+    margin-bottom: 4px;
+  }
+
+  .step-note {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* AI INSIGHT */
+  .ai-insight {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #bbb;
+    margin-bottom: 20px;
+  }
+
+  .ai-insight strong { color: var(--text); font-weight: 500; }
+
+  /* ALTERNATIVES */
+  .alt-header { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; margin-bottom: 10px; color: var(--muted); }
+
+  .alt-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .alt-card:hover { border-color: var(--green); }
+
+  .alt-route { font-size: 13px; color: var(--text); }
+  .alt-meta { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .alt-price { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--yellow); }
+
+  /* LOADING */
+  .loading-wrap {
+    padding: 32px 0;
+    text-align: center;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .loading-dots {
+    display: inline-flex;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .loading-dots span {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: bounce 1.2s infinite ease-in-out;
+  }
+
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes bounce {
+    0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  .loading-text { color: var(--muted); font-size: 14px; }
+
+  /* FEEDBACK */
+  .feedback-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .feedback-label { font-size: 12px; color: var(--muted); flex: 1; }
+
+  .fb-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .fb-btn:hover { border-color: var(--green); color: var(--green); }
+
+  /* ERROR */
+  .error-wrap {
+    background: rgba(255,60,60,0.08);
+    border: 1px solid rgba(255,60,60,0.2);
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 14px;
+    color: #ff8a80;
+    animation: fadeUp 0.3s ease;
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 11px;
+    color: #444;
+    border-top: 1px solid var(--border);
+  }
+
+  footer a { color: #666; text-decoration: none; }
+
+  @media (max-width: 480px) {
+    .hero { padding: 32px 20px 24px; }
+    .container { padding: 0 16px 60px; }
+    header { padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Oya <span>Move</span></div>
+  <div class="badge">Lagos Transit AI · Beta</div>
+</header>
+
+<div class="hero">
+  <h1>Navigate Lagos<br>like an <em>old-timer</em></h1>
+  <p>Step-by-step public transport routes with real fare ranges — powered by local knowledge</p>
+</div>
+
+<div class="container">
+  <div class="search-card">
+    <div class="input-group">
+      <div class="input-wrap">
+        <div class="input-dot green"></div>
+        <input type="text" id="from-input" placeholder="Where are you coming from?" autocomplete="off">
+      </div>
+      <div class="input-wrap">
+        <div class="input-dot yellow"></div>
+        <input type="text" id="to-input" placeholder="Where do you want to go?" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="prefs-row">
+      <button class="pref-btn active" data-pref="balanced">⚖️ Balanced</button>
+      <button class="pref-btn" data-pref="cheapest">💰 Cheapest</button>
+      <button class="pref-btn" data-pref="fastest">⚡ Fastest</button>
+    </div>
+
+    <button class="go-btn" id="search-btn" onclick="doSearch()">
+      Find My Route →
+    </button>
+  </div>
+
+  <div class="section-label">Popular Routes</div>
+  <div class="quick-routes">
+    <div class="quick-chip" onclick="quickRoute('Lawanson', 'Victoria Island')">Lawanson → VI</div>
+    <div class="quick-chip" onclick="quickRoute('Yaba', 'Lagos Island')">Yaba → Lagos Island</div>
+    <div class="quick-chip" onclick="quickRoute('Oshodi', 'Victoria Island')">Oshodi → VI</div>
+    <div class="quick-chip" onclick="quickRoute('Surulere', 'Lekki')">Surulere → Lekki</div>
+    <div class="quick-chip" onclick="quickRoute('Mushin', 'Marina')">Mushin → Marina</div>
+    <div class="quick-chip" onclick="quickRoute('Ikorodu', 'CMS')">Ikorodu → CMS</div>
+  </div>
+
+  <div id="output"></div>
+</div>
+
+<footer>
+  Built for Lagos commuters · <a href="#">Suggest a route correction</a> · Fares updated Jan 2025
+</footer>
+
+<script>
+// ── ROUTE KNOWLEDGE BASE ────────────────────────────────────────────────────
+// This is the seed data — the "Lagos old-timer knowledge" encoded as structured data.
+// Each route entry has: id, from, to, steps[], totalMin, totalMax, duration, notes
+const ROUTES = [
+  {
+    id: "lawanson-vi",
+    from: "Lawanson", to: "Victoria Island",
+    tags: ["lawanson", "surulere", "vi", "victoria island", "adeola odeku", "law school"],
+    preference: "balanced",
+    steps: [
+      { from: "Lawanson Bus Stop", to: "Ojuelegba", mode: "danfo", fareMin: 200, fareMax: 400, note: "Board any danfo heading towards Ojuelegba. Tell conductor 'Ojuelegba'. Takes ~15 mins." },
+      { from: "Ojuelegba", to: "CMS / Broad Street", mode: "brt", fareMin: 500, fareMax: 800, note: "Take the BRT from Ojuelegba overhead bridge — fastest option. Or board a danfo to CMS (N400–600). BRT is more comfortable." },
+      { from: "CMS", to: "Victoria Island (Adeola Odeku)", mode: "danfo", fareMin: 300, fareMax: 500, note: "Board any bus heading to VI. Tell conductor 'Adeola Odeku' or 'Law School' depending on your destination. ~20 mins." }
+    ],
+    totalMin: 1000, totalMax: 1700,
+    duration: "45–75 mins",
+    aiNote: "This is one of the most common Mainland → Island routes. Morning rush (7–9am) and evening (5–7pm) will nearly double your travel time due to Third Mainland/Carter Bridge traffic. If you're going to VI Lekki side, board a 'Ozumba Mbadiwe' bus at CMS instead.",
+    alternatives: [
+      { route: "Lawanson → Ojuelegba → BRT all the way to VI", fare: "N700–1200", meta: "Faster, fewer stops, BRT direct" },
+      { route: "Lawanson → Eko Bridge route via Mile 2", fare: "N800–1500", meta: "Avoid 3rd Mainland — use if bridge is clear" }
+    ]
+  },
+  {
+    id: "yaba-lagosisland",
+    from: "Yaba", to: "Lagos Island",
+    tags: ["yaba", "lagos island", "broad street", "marina", "tinubu square"],
+    preference: "balanced",
+    steps: [
+      { from: "Yaba Bus Stop", to: "Ojuelegba", mode: "danfo", fareMin: 150, fareMax: 300, note: "Very short hop. Board any danfo or even keke going towards Ojuelegba junction. 5–10 mins." },
+      { from: "Ojuelegba", to: "Lagos Island (CMS / Broad St)", mode: "brt", fareMin: 500, fareMax: 700, note: "BRT from overhead bridge direct to CMS. Alternatively, danfo to Lagos Island costs N400–600 but takes longer in traffic." }
+    ],
+    totalMin: 650, totalMax: 1000,
+    duration: "25–50 mins",
+    aiNote: "Yaba to Lagos Island is one of the easier Mainland → Island journeys. The BRT option from Ojuelegba is highly recommended — it uses a dedicated lane so it beats traffic most of the time. If you're going to Broad Street, Marina, or Tinubu Square, CMS is your drop-off.",
+    alternatives: [
+      { route: "Yaba → Ebute Metta → Eko Bridge → Lagos Island", fare: "N500–800", meta: "Alternative if Ojuelegba is congested" }
+    ]
+  },
+  {
+    id: "oshodi-vi",
+    from: "Oshodi", to: "Victoria Island",
+    tags: ["oshodi", "vi", "victoria island", "isale eko", "adeola odeku"],
+    preference: "balanced",
+    steps: [
+      { from: "Oshodi Bus Terminal", to: "Ojuelegba", mode: "danfo", fareMin: 300, fareMax: 500, note: "Board a danfo or BRT feeder bus going towards Ojuelegba. This passes through Mushin. ~20–30 mins." },
+      { from: "Ojuelegba", to: "CMS", mode: "brt", fareMin: 500, fareMax: 700, note: "BRT from overhead bridge. Or danfo heading to CMS/Lagos Island." },
+      { from: "CMS", to: "Victoria Island", mode: "danfo", fareMin: 300, fareMax: 500, note: "Any bus marked 'VI' or 'Adeola Odeku'. Ask conductor before boarding." }
+    ],
+    totalMin: 1100, totalMax: 1700,
+    duration: "60–90 mins",
+    aiNote: "Oshodi is a major transport hub so you'll never lack options. The challenge is that Oshodi–Ojuelegba stretch can be very congested. If you're in a hurry, look for express buses that bypass some stops. Budget 90 mins for rush hour.",
+    alternatives: [
+      { route: "Oshodi → Mile 2 → Eko Bridge → Lagos Island → VI", fare: "N1000–1800", meta: "Faster in some traffic conditions" },
+      { route: "Oshodi BRT → directly to CMS, then VI bus", fare: "N1000–1500", meta: "Check if BRT runs direct from Oshodi terminal" }
+    ]
+  },
+  {
+    id: "surulere-lekki",
+    from: "Surulere", to: "Lekki",
+    tags: ["surulere", "lekki", "lekki phase 1", "lekki phase 2", "admiralty way"],
+    preference: "balanced",
+    steps: [
+      { from: "Surulere (Ojuelegba / Aguda)", to: "CMS / Lagos Island", mode: "danfo", fareMin: 400, fareMax: 700, note: "Board from Ojuelegba or Aguda bus stop. Tell conductor 'CMS' or 'Lagos Island'. ~25–40 mins." },
+      { from: "CMS / Lagos Island", to: "Lekki Phase 1 / Admiralty Way", mode: "danfo", fareMin: 500, fareMax: 800, note: "Look for buses marked 'Lekki' or 'Lekki Phase 1' at CMS. They go through Victoria Island then into Lekki. ~30–45 mins depending on VI traffic." }
+    ],
+    totalMin: 900, totalMax: 1500,
+    duration: "55–90 mins",
+    aiNote: "Surulere to Lekki requires crossing Lagos Island, which means you'll hit VI traffic. The CMS to Lekki buses go through Ozumba Mbadiwe or Falomo Bridge. For Lekki Phase 2 or beyond, you may need to switch buses at Lekki Phase 1 roundabout.",
+    alternatives: [
+      { route: "Surulere → VI (Adeola Odeku) → bike/keke to Lekki", fare: "N900–1600", meta: "Faster last mile if Lekki bus is scarce" }
+    ]
+  },
+  {
+    id: "mushin-marina",
+    from: "Mushin", to: "Marina",
+    tags: ["mushin", "marina", "customs", "boat club road", "broad street", "tinubu"],
+    preference: "balanced",
+    steps: [
+      { from: "Mushin Bus Stop", to: "Ojuelegba", mode: "danfo", fareMin: 200, fareMax: 400, note: "Board from Mushin market area or Ilasamaja. Danfo or keke to Ojuelegba. 15–20 mins." },
+      { from: "Ojuelegba", to: "Lagos Island / CMS", mode: "brt", fareMin: 500, fareMax: 700, note: "BRT from Ojuelegba overhead bridge to CMS. Quick and relatively comfortable." },
+      { from: "CMS", to: "Marina / Customs", mode: "keke", fareMin: 200, fareMax: 400, note: "Keke or short walk along Marina road. The Marina waterfront is a 5–10 min keke ride from CMS." }
+    ],
+    totalMin: 900, totalMax: 1500,
+    duration: "40–65 mins",
+    aiNote: "Mushin to Marina is very doable. The tricky bit is the last stretch — Marina and Customs area have limited bus options so a keke from CMS is your best bet. The Marina road itself is usually less congested than other Lagos Island routes.",
+    alternatives: [
+      { route: "Mushin → Oshodi → Mile 2 → Lagos Island", fare: "N700–1200", meta: "Longer but more options if Ojuelegba is jammed" }
+    ]
+  },
+  {
+    id: "ikorodu-cms",
+    from: "Ikorodu", to: "CMS",
+    tags: ["ikorodu", "cms", "broad street", "lagos island", "brt"],
+    preference: "balanced",
+    steps: [
+      { from: "Ikorodu Ferry Terminal", to: "CMS Jetty", mode: "ferry", fareMin: 800, fareMax: 1200, note: "⭐ Recommended! The Lagos Ferry Service runs Ikorodu → CMS. Takes only 45–60 mins vs 2+ hours by road. Very comfortable." },
+      { from: "CMS Jetty", to: "Your CMS destination", mode: "keke", fareMin: 100, fareMax: 300, note: "Quick keke or short walk once you disembark at CMS jetty." }
+    ],
+    totalMin: 900, totalMax: 1500,
+    duration: "50–75 mins (by ferry)",
+    aiNote: "The ferry is BY FAR the best option from Ikorodu. The road option (Ikorodu Road → Mile 12 → Ketu → Ojota → Maryland → Lagos Island) can take 3–4 hours in traffic. Ferry runs roughly every 30 mins from Ikorodu terminal. Always confirm the last boat timing before you go.",
+    alternatives: [
+      { route: "Ikorodu → Mile 12 → BRT to Lagos Island", fare: "N800–1400", meta: "Road option — allow 2.5–4 hrs in traffic" }
+    ]
+  }
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let activePref = "balanced";
+
+document.querySelectorAll('.pref-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.pref-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activePref = btn.dataset.pref;
+  });
+});
+
+// ── ROUTE MATCHING ───────────────────────────────────────────────────────────
+function normalise(str) {
+  return str.toLowerCase().replace(/[^a-z0-9 ]/g, '').trim();
+}
+
+function findRoute(from, to) {
+  const nFrom = normalise(from);
+  const nTo = normalise(to);
+  return ROUTES.find(r =>
+    r.tags.some(t => nFrom.includes(t) || t.includes(nFrom.replace(/\s+/g, ''))) &&
+    r.tags.some(t => nTo.includes(t) || t.includes(nTo.replace(/\s+/g, '')))
+  );
+}
+
+// ── QUICK ROUTE ──────────────────────────────────────────────────────────────
+function quickRoute(from, to) {
+  document.getElementById('from-input').value = from;
+  document.getElementById('to-input').value = to;
+  doSearch();
+}
+
+// ── SEARCH ───────────────────────────────────────────────────────────────────
+async function doSearch() {
+  const from = document.getElementById('from-input').value.trim();
+  const to = document.getElementById('to-input').value.trim();
+
+  if (!from || !to) {
+    showError("Please enter both your starting point and destination.");
+    return;
+  }
+
+  showLoading(from, to);
+
+  // Check local knowledge base first
+  const localRoute = findRoute(from, to);
+
+  if (localRoute) {
+    // Small delay for UX
+    setTimeout(() => renderResult(localRoute, from, to), 800);
+  } else {
+    // Fall back to AI for unknown routes
+    await askAI(from, to);
+  }
+}
+
+// ── ASK AI (Anthropic API) ───────────────────────────────────────────────────
+async function askAI(from, to) {
+  const systemPrompt = `You are a Lagos, Nigeria public transport expert. You know all the danfo routes, BRT lines, keke napep routes, okada, and ferry services in Lagos. You give practical, step-by-step routing advice with realistic fare ranges in Nigerian Naira.
+
+Your response must be ONLY a valid JSON object with this exact structure:
+{
+  "found": true,
+  "from": "exact from location name",
+  "to": "exact to location name",
+  "steps": [
+    {
+      "from": "step origin name",
+      "to": "step destination name",
+      "mode": "danfo|brt|keke|okada|ferry|bus",
+      "fareMin": 200,
+      "fareMax": 500,
+      "note": "practical boarding tip and timing"
+    }
+  ],
+  "totalMin": 1000,
+  "totalMax": 2000,
+  "duration": "45–75 mins",
+  "aiNote": "contextual tip about traffic, best time to travel, alternatives",
+  "alternatives": [
+    { "route": "brief alternative description", "fare": "N500–900", "meta": "when this is better" }
+  ]
+}
+
+If you don't know the route or it's not in Lagos, return: { "found": false, "message": "explanation" }
+
+Fares as of early 2025. Be practical and specific. Include pidgin-friendly tips where helpful.`;
+
+  const userMsg = `I need to get from ${from} to ${to} in Lagos using public transport. My preference is ${activePref}. Give me step-by-step directions with fare ranges.`;
+
+  try {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: "user", content: userMsg }]
+      })
+    });
+
+    const data = await resp.json();
+    const text = data.content?.map(c => c.text || "").join("") || "";
+    const clean = text.replace(/```json|```/g, "").trim();
+    const parsed = JSON.parse(clean);
+
+    if (parsed.found === false) {
+      showError(`Sorry, I couldn't find a route for "${from}" to "${to}" in Lagos. Try using well-known landmarks or bus stops (e.g. "Lawanson", "Ojuelegba", "CMS", "VI").`);
+    } else {
+      renderResult(parsed, from, to);
+    }
+  } catch (err) {
+    showError("Couldn't fetch this route right now. Try one of the popular routes above, or check your connection.");
+  }
+}
+
+// ── RENDER RESULT ────────────────────────────────────────────────────────────
+function renderResult(route, inputFrom, inputTo) {
+  const modeEmoji = { danfo: "🚌", brt: "🚎", keke: "🛺", okada: "🏍️", ferry: "⛴️", bus: "🚌" };
+  const modeLabel = { danfo: "Danfo", brt: "BRT", keke: "Keke", okada: "Okada", ferry: "Ferry", bus: "Bus" };
+  const modeTag = { danfo: "tag-danfo", brt: "tag-brt", keke: "tag-keke", okada: "tag-okada", ferry: "tag-ferry", bus: "tag-brt" };
+
+  let stepsHTML = "";
+  route.steps.forEach((step, i) => {
+    const isLast = i === route.steps.length - 1;
+    stepsHTML += `
+      <div class="step">
+        <div class="step-timeline">
+          <div class="step-icon">${modeEmoji[step.mode] || "🚌"}</div>
+          ${!isLast ? '<div class="step-connector"></div>' : ''}
+        </div>
+        <div class="step-body">
+          <div class="step-location">${step.from}</div>
+          <div class="step-card">
+            <div class="step-transport">
+              <span class="transport-tag ${modeTag[step.mode] || 'tag-brt'}">${modeLabel[step.mode] || step.mode.toUpperCase()}</span>
+              → ${step.to}
+            </div>
+            <div class="step-fare">₦${step.fareMin.toLocaleString()} – ₦${step.fareMax.toLocaleString()}</div>
+            <div class="step-note">${step.note}</div>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  // Final destination marker
+  const last = route.steps[route.steps.length - 1];
+  stepsHTML += `
+    <div class="step">
+      <div class="step-timeline">
+        <div class="step-icon" style="border-color: var(--yellow); background: rgba(255,214,0,0.1);">📍</div>
+      </div>
+      <div class="step-body">
+        <div class="step-location" style="color: var(--yellow);">${last.to}</div>
+        <div style="font-size:12px; color: var(--muted); padding-top: 2px;">You have arrived!</div>
+      </div>
+    </div>`;
+
+  // Alternatives
+  let altsHTML = "";
+  if (route.alternatives && route.alternatives.length) {
+    altsHTML = `<div class="alt-header">OTHER OPTIONS</div>`;
+    route.alternatives.forEach(alt => {
+      altsHTML += `
+        <div class="alt-card">
+          <div>
+            <div class="alt-route">${alt.route}</div>
+            <div class="alt-meta">${alt.meta}</div>
+          </div>
+          <div class="alt-price">${alt.fare}</div>
+        </div>`;
+    });
+  }
+
+  document.getElementById('output').innerHTML = `
+    <div class="result-wrap">
+      <div class="result-header">
+        <div class="result-title">
+          Your Route
+          <div class="from-to">${inputFrom} → ${inputTo}</div>
+        </div>
+        <div class="total-badge">
+          <div class="label">Est. Total</div>
+          <div class="amount">₦${route.totalMin.toLocaleString()} – ₦${route.totalMax.toLocaleString()}</div>
+        </div>
+      </div>
+
+      <div class="steps">${stepsHTML}</div>
+
+      ${route.aiNote ? `<div class="ai-insight"><strong>💡 Local tip:</strong> ${route.aiNote}</div>` : ''}
+
+      ${altsHTML}
+
+      <div class="feedback-row">
+        <span class="feedback-label">Was this route helpful?</span>
+        <button class="fb-btn" onclick="this.textContent='✓ Thanks!'">👍 Yes</button>
+        <button class="fb-btn" onclick="this.textContent='✓ Noted!'">👎 Wrong</button>
+      </div>
+    </div>`;
+}
+
+function showLoading(from, to) {
+  document.getElementById('output').innerHTML = `
+    <div class="loading-wrap">
+      <div class="loading-dots"><span></span><span></span><span></span></div>
+      <div class="loading-text">Finding your route from ${from} to ${to}…</div>
+    </div>`;
+}
+
+function showError(msg) {
+  document.getElementById('output').innerHTML = `<div class="error-wrap">⚠️ ${msg}</div>`;
+}
+
+// Enter key support
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+</script>
+</body>
+</html>
